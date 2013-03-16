@@ -81,7 +81,6 @@ void detectde(char *username) {
 					de = "GNOME";
 					pclose(pid);
 					break;
-
 				} else if(strcmp(dename, "ksmserver") == 0 || strcmp(dename, "plasma-desktop") == 0) {
 					de = "KDE";
 					pclose(pid);
@@ -107,8 +106,6 @@ void detectde(char *username) {
 		de = "Unable to retrieve";
 
 	fprintf(stdout, "    %sDE:      %s%s\n", LABEL, TEXT, de);
-	/*free(dename);*/
-	/*free(de);*/
 }
 
 void detectwm(char *username) {
@@ -132,8 +129,6 @@ void detectwm(char *username) {
 	if(!wm)
 		wm = "Unable to retrieve";
 	fprintf(stdout, "    %sWM:      %s%s\n", LABEL, TEXT, wm);
-	/*free(wm);
-	free(wmname);*/
 }
 
 void listpkgs(void) {
@@ -147,6 +142,7 @@ void listpkgs(void) {
 	for(i = alpm_db_get_pkgcache(db_local); i; i = alpm_list_next(i)) {
 		package++;
 	}
+	alpm_release(handle);
 	printf("    %sPacman:  %s%d installed packages\n", LABEL, TEXT, package);
 }
 
@@ -163,7 +159,7 @@ int main(int argc, char *argv[]) {
 			case 'c':
 				showcolors = 1;
 				colorpath = optarg;
-    		break;
+			break;
 			case 'p':
 				showpkgs = 1;
 			break;
@@ -184,7 +180,7 @@ int main(int argc, char *argv[]) {
 
 	username = getenv("USER");
 	shell = getenv("SHELL");
-    if(!username)
+	if(!username)
 		username = "Unable to retrieve";
 	if(!shell)
 		shell = "Unable to retrieve";
