@@ -1,9 +1,10 @@
 Sysinfo
 =========
 
-** A tool to display theme and system information to be used in screenshots.**
+**A tool to display theme and system information to be used in screenshots.**
 
 This little application will print information about your system and your theme, along with some nice ASCII art when run.
+
 **NOTE:** This application is specifically written for Arch Linux; the ASCII art is the Arch Linux logo and the package count only works with Pacman.
 
 Currently, it prints the following:
@@ -19,6 +20,7 @@ Currently, it prints the following:
 * Terminal colors[2].
 
 [1]: This is an optional feature and for now only works with Pacman.
+
 [2]: This is an optional feature and requires the path to a script that prints colors. An example script can be found below:
 
 	#!/bin/bash
