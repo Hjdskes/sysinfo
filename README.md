@@ -5,7 +5,7 @@ Sysinfo
 
 This little application will print information about your system and your theme, along with some nice ASCII art when run.
 
-**NOTE:** This application is specifically written for Arch Linux; the ASCII art is the Arch Linux logo and the package count only works with Pacman.
+**NOTE:** This application is specifically written for Arch Linux; the ASCII art is the Arch Linux logo and the package count only works with Pacman. Also, even though it detects DEs, it's essentialy made for lightweight desktops; it only checks `~/.config/gtk-3.0/settings.ini`, `~/.gtkrc-2.0` and `~/.gtkrc-2.0.mine` for its theme retrieval. Support for proper theme detection inside DEs might be added later.
 
 Currently, it prints the following:
 * Shell;

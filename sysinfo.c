@@ -81,10 +81,7 @@ void detectde(char *username) {
 					de = "GNOME";
 					pclose(pid);
 					break;
-				} else if(strcmp(dename, "xfce-mcs-manage") == 0 || strcmp(dename, "xfce4-session") || strcmp(dename, "xfconfd") == 0) {
-					de = "XFCE4";
-					pclose(pid);
-					break;
+
 				} else if(strcmp(dename, "ksmserver") == 0 || strcmp(dename, "plasma-desktop") == 0) {
 					de = "KDE";
 					pclose(pid);
@@ -95,6 +92,10 @@ void detectde(char *username) {
 					break;
 				} else if(strcmp(dename, "mate-session") == 0 || strcmp(dename, "mate-settings-daemon") == 0) {
 					de = "Mate";
+					pclose(pid);
+					break;
+				} else if(strcmp(dename, "xfce-mcs-manage") == 0 || strcmp(dename, "xfce4-session") || strcmp(dename, "xfconfd") == 0) {
+					de = "XFCE4";
 					pclose(pid);
 					break;
 				}
