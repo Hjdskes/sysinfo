@@ -1,10 +1,9 @@
 pkgname=sysinfo-git
 pkgbase=sysinfo
-pkgver=20130305
+pkgver=20130316
 pkgrel=1
 pkgdesc="A tool to display theme and system information to be used in screenshots"
 arch=(any)
-groups=(custom)
 url="https://github.com/Unia/sysinfo"
 license=(GPL2)
 depends=('pacman' 'glib2')
