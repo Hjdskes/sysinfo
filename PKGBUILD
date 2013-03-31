@@ -24,10 +24,11 @@ build() {
 		git clone ${_gitroot} ${_gitname}
 	fi
 	msg "GIT checkout done or server timeout"
+
+	make
 }
 
 package() {
 	cd "$srcdir/$pkgbase"
-	make
 	make DESTDIR="$pkgdir" install
 }
