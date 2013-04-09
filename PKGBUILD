@@ -1,6 +1,6 @@
 pkgname=sysinfo-git
 pkgbase=sysinfo
-pkgver=20130316
+pkgver=2013.03.28
 pkgrel=1
 pkgdesc="A tool to display theme and system information to be used in screenshots"
 arch=(any)
@@ -11,6 +11,11 @@ md5sums=()
 
 _gitroot="https://github.com/Unia/$pkgbase"
 _gitname="$pkgbase"
+
+pkgver() {
+    cd "$srcdir/$_gitname"
+    git log -1 --format="%cd" --date=short | sed 's|-|.|g'
+}
 
 build() {
 	cd "$srcdir"
