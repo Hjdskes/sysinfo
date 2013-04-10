@@ -1,39 +1,29 @@
+# Maintainer: Unia <jthidskes@outlook.com> 
+
 pkgname=sysinfo-git
-pkgbase=sysinfo
-pkgver=2013.03.28
+_gitname=sysinfo
+pkgver=2013.04.10
 pkgrel=1
 pkgdesc="A tool to display theme and system information to be used in screenshots"
-arch=(any)
+arch=('i686' 'x86_64')
 url="https://github.com/Unia/sysinfo"
-license=(GPL2)
+license=('GPL2')
 depends=('pacman' 'glib2')
-md5sums=()
-
-_gitroot="https://github.com/Unia/$pkgbase"
-_gitname="$pkgbase"
-
-build() {
-	cd "$srcdir"
-	msg "Connecting to GIT server..."
-
-	if [ -d ${_gitname} ] ; then
-		cd ${_gitname}
-		git pull
-		msg "The local files are updated."
-	else
-		git clone ${_gitroot} ${_gitname}
-	fi
-	msg "GIT checkout done or server timeout"
-
-	make
-}
+makedepends=('git')
+source=('git://github.com/Unia/sysinfo.git')
+md5sums=('SKIP')
 
 pkgver() {
-    cd "$srcdir/$_gitname"
-    git log -1 --format="%cd" --date=short | sed 's\-\.\g'
+  cd $_gitname
+  git log -1 --format="%cd" --date=short | sed 's|-|.|g'
+}
+
+build() {
+  cd $_gitname
+  make
 }
 
 package() {
-	cd "$srcdir/$pkgbase"
-	make DESTDIR="$pkgdir" install
+  cd $_gitname
+  make PREFIX=/usr DESTDIR="$pkgdir" install
 }
