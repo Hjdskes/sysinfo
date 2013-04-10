@@ -152,13 +152,13 @@ void detectwm(char *username) {
 
 void listpkgs(void) {
 	alpm_list_t *i;
-	alpm_db_t *db_local;
+	alpm_db_t *db_path;
 	alpm_handle_t *handle = NULL;
 	int package = 0;
 
 	handle = alpm_initialize ("/", "/var/lib/pacman", NULL);
-	db_local = alpm_option_get_localdb(handle);
-	for(i = alpm_db_get_pkgcache(db_local); i; i = alpm_list_next(i)) {
+	db_path = alpm_get_localdb(handle);
+	for(i = alpm_db_get_pkgcache(db_path); i; i = alpm_list_next(i)) {
 		package++;
 	}
 	alpm_release(handle);
