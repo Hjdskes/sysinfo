@@ -85,48 +85,6 @@ void parsegtkrc(void) {
 	free(font);
 }
 
-void detectde(char *username) {
-	FILE *pid;
-	int i;
-	char pgrep[100], *dename, *de = NULL, testde[100];
-
-	for(i = 0; i < 10; i++) {
-		dename = denames[i];
-		sprintf(pgrep, "pgrep -U %s -x %s", username, dename);
-		pid = popen(pgrep, "r");
-		if(pid != NULL) {
-			if(fgets(testde, sizeof(testde), pid)) {
-				if(strcmp(dename, "gnome-session") == 0 || strcmp(dename, "gnome-settings-daemon") == 0) {
-					de = "GNOME";
-					pclose(pid);
-					break;
-				} else if(strcmp(dename, "ksmserver") == 0 || strcmp(dename, "plasma-desktop") == 0) {
-					de = "KDE";
-					pclose(pid);
-					break;
-				} else if(strcmp(dename, "lxsession") == 0) {
-					de = "LXDE";
-					pclose(pid);
-					break;
-				} else if(strcmp(dename, "mate-session") == 0 || strcmp(dename, "mate-settings-daemon") == 0) {
-					de = "Mate";
-					pclose(pid);
-					break;
-				} else if(strcmp(dename, "xfce-mcs-manage") == 0 || strcmp(dename, "xfce4-session") || strcmp(dename, "xfconfd") == 0) {
-					de = "XFCE4";
-					pclose(pid);
-					break;
-				}
-			} else
-				pclose(pid);
-		}
-	}
-	if(!de)
-		de = "Unable to retrieve";
-
-	fprintf(stdout, "    %sDE:      %s%s\n", LABEL, TEXT, de);
-}
-
 void detectwm(char *username) {
 	FILE *pid;
 	int i;
@@ -208,7 +166,6 @@ int main(int argc, char *argv[]) {
 		fprintf(stdout, "    %sHost:    %s%s\n    %sKernel:  %s%s %s\n", LABEL, TEXT, my_uname.nodename, LABEL, TEXT, my_uname.release,my_uname.machine);
 	if(showpkgs)
 		listpkgs();
-	detectde(username);
 	detectwm(username);
 	parsegtkrc();
 	if(showcolors) {

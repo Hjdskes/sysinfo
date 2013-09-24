@@ -5,7 +5,7 @@ Sysinfo
 
 This little application will print information about your system and your theme, along with some nice ASCII art when run.
 
-**NOTE:** This application is specifically written for Arch Linux; the ASCII art is the Arch Linux logo and the package count only works with Pacman. Also, even though it detects DEs, it's essentialy made for lightweight desktops; it only checks `~/.config/gtk-3.0/settings.ini`, `~/.gtkrc-2.0` and `~/.gtkrc-2.0.mine` for its theme retrieval.
+**NOTE:** This application is specifically written for Arch Linux; the ASCII art is the Arch Linux logo and the package count only works with Pacman. Sysinfo is made for lightweight desktops; it only checks `~/.config/gtk-3.0/settings.ini`, `~/.gtkrc-2.0` and `~/.gtkrc-2.0.mine` for its theme retrieval.
 
 Currently, it prints the following:
 * Shell;
@@ -19,7 +19,7 @@ Currently, it prints the following:
 * Font (GTK);
 * Terminal colors[2].
 
-[1]: This is an optional feature and for now only works with Pacman.
+[1]: This is an optional feature and only works with Pacman.
 
 [2]: This is an optional feature and requires the path to a script that prints colors. An example script can be found below:
 
@@ -38,7 +38,7 @@ Currently, it prints the following:
 Supported Window Managers and Desktop Environments
 --------------------------------------------------
 
-The following Window Managers and Desktop Environments are supported.
+The following Window Managers are supported.
 
 **Window Managers:**
 * Fluxbox;
@@ -75,14 +75,6 @@ The following Window Managers and Desktop Environments are supported.
 * Kwin;
 * Beryl;
 * Emerald.
-
-**Desktop Environments:**
-* GNOME;
-* Cinnamon;
-* KDE;
-* XFCE;
-* LXDE;
-* Mate.
 
 Installation
 ------------
