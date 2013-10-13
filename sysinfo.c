@@ -37,8 +37,6 @@ static int showcolors = 0;
 char *wmnames[] = { "fluxbox", "openbox", "blackbox", "icewm", "pekwm", "fvwm", "dwm", "awesomewm", "windowmaker", \
 	"stumpwm", "xmonad", "musca", "i3", "ratpoison", "scrotwm", "spectrwm",	"wmfs2", "wmii", "subtle", "e16", "wmfs", "compiz", "muffin", \
 	"enlightenment", "sawfish", "monsterwm", "dminiwm", "herbstluftwm", "xfwm4", "mutter", "metacity", "kwin", "beryl", "emerald", NULL };
-char *denames[] = { "gnome-session", "gnome-settings-daemon", "xfce-mcs-manage", "xfce4-session", "xfconfd", "ksmserver", "plasma-desktop", "lxsession", \
-	"mate-session", "mate-settings-daemon", NULL };
 
 void printhelp(int exval) {
 	fprintf(stdout, "sysinfo - %sshow system/theme information in screenshots\n\
@@ -54,9 +52,9 @@ void parsegtkrc(void) {
 	GKeyFile *settings;
 
 	home = getenv("HOME");
-	sprintf(gtk3rc, "%s/.config/gtk-3.0/settings.ini", home);
-	sprintf(gtk2rc, "%s/.gtkrc-2.0", home);
-	sprintf(gtk2rcmine, "%s/.gtkrc-2.0.mine", home);
+	snprintf(gtk3rc, 100, "%s/.config/gtk-3.0/settings.ini", home);
+	snprintf(gtk2rc, 50, "%s/.gtkrc-2.0", home);
+	snprintf(gtk2rcmine, 50, "%s/.gtkrc-2.0.mine", home);
 	settings = g_key_file_new();
 	if(access(gtk3rc, F_OK) != -1 ) {
 		if(g_key_file_load_from_file (settings, gtk3rc, G_KEY_FILE_NONE, NULL) == TRUE) {
@@ -92,7 +90,7 @@ void detectwm(char *username) {
 
 	for(i = 0; i < 34; i++) {
 		wmname = wmnames[i];
-		sprintf(pgrep, "pgrep -U %s -x %s", username, wmname);
+		snprintf(pgrep, 100, "pgrep -U %s -x %s", username, wmname);
 		pid = popen(pgrep, "r");
 		if(pid != NULL) {
 			if(fgets(testwm, sizeof(testwm), pid)) {
