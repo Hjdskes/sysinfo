@@ -1,14 +1,14 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /*
  * sysinfo.c
- * Copyright (C) 2013 Jente (jthidskes at outlook dot com)
+ * Copyright (C) 2013-2014 Jente Hidskes (hjdskes@gmail.com)
  *
- * sysinfo.c is free software: you can redistribute it and/or modify it
+ * Sysinfo is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * sysinfo.c is distributed in the hope that it will be useful, but
+ * Sysinfo is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -22,23 +22,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
 #include <alpm.h>
-#include <glib.h>
+#include <iniparser.h>
 #include <getopt.h>
 #include <sys/utsname.h>
 
-#define TEXT "\e[0;37m"
-#define LABEL "\e[1;34m"
-#define BOLDTEXT "\e[1;37m"
+#define TEXT      "\033[0;37m"
+#define LABEL     "\033[1;34m"
+#define BOLDTEXT  "\033[1;37m"
+#define LENGTH(X) (sizeof X / sizeof X[0]) 
 
-static int showpkgs = 0;
-static int showcolors = 0;
-
-char *wmnames[] = { "fluxbox", "openbox", "blackbox", "icewm", "pekwm", "fvwm", "dwm", "awesomewm", "windowmaker", \
-	"stumpwm", "xmonad", "musca", "i3", "ratpoison", "scrotwm", "spectrwm",	"wmfs2", "wmii", "subtle", "e16", "wmfs", "compiz", "muffin", \
-	"enlightenment", "sawfish", "monsterwm", "dminiwm", "herbstluftwm", "xfwm4", "mutter", "metacity", "kwin", "beryl", "emerald", NULL };
-
-void printhelp(int exval) {
+void
+printhelp(int exval) {
 	fprintf(stdout, "sysinfo - %sshow system/theme information in screenshots\n\
 	sysinfo [-h] [-p] [-c /path/to/script]\n\n\
 	-h                    print this help and exit\n\
@@ -47,50 +44,77 @@ void printhelp(int exval) {
  	exit(exval);
 }
 
-void parsegtkrc(void) {
-	char *home, gtk3rc[100], gtk2rc[50], gtk2rcmine[50], *gtktheme = NULL, *icontheme = NULL, *font = NULL;
-	GKeyFile *settings;
+void
+parsegtkrc() {
+	dictionary *d;
+	char *home, *gtkrc, *theme, *icons, *font;
+	int len;
 
 	home = getenv("HOME");
-	snprintf(gtk3rc, 100, "%s/.config/gtk-3.0/settings.ini", home);
-	snprintf(gtk2rc, 50, "%s/.gtkrc-2.0", home);
-	snprintf(gtk2rcmine, 50, "%s/.gtkrc-2.0.mine", home);
-	settings = g_key_file_new();
-	if(access(gtk3rc, F_OK) != -1 ) {
-		if(g_key_file_load_from_file (settings, gtk3rc, G_KEY_FILE_NONE, NULL) == TRUE) {
-			gtktheme = g_key_file_get_string(settings, "Settings", "gtk-theme-name", NULL);
-			icontheme = g_key_file_get_string(settings, "Settings", "gtk-icon-theme-name", NULL);
-			font = g_key_file_get_string(settings, "Settings", "gtk-font-name", NULL);
-		}
-	} else if(access(gtk2rc, F_OK) != -1 ) {
-		if(g_key_file_load_from_file (settings, gtk2rc, G_KEY_FILE_NONE, NULL) == TRUE) {
-			gtktheme = g_key_file_get_string(settings, "Settings", "gtk-theme-name", NULL);
-			icontheme = g_key_file_get_string(settings, "Settings", "gtk-icon-theme-name", NULL);
-			font = g_key_file_get_string(settings, "Settings", "gtk-font-name", NULL);
-		}
-	} else if(access(gtk2rcmine, F_OK) != -1 ) {
-		if(g_key_file_load_from_file (settings, gtk2rcmine, G_KEY_FILE_NONE, NULL) == TRUE) {
-			gtktheme = g_key_file_get_string(settings, "Settings", "gtk-theme-name", NULL);
-			icontheme = g_key_file_get_string(settings, "Settings", "gtk-icon-theme-name", NULL);
-			font = g_key_file_get_string(settings, "Settings", "gtk-font-name", NULL);
-		}
+	/* first try gtk+-3.0 */
+	len = strlen(home) + strlen("/.config/gtk-3.0/settings.ini") + 1; /* null-byte */
+	gtkrc = (char *)malloc(sizeof(char) * len);
+	snprintf(gtkrc, len, "%s/.config/gtk-3.0/settings.ini", home);
+	if(access(gtkrc, F_OK) == 0) {
+		d = iniparser_load(gtkrc);
+		theme = iniparser_getstring(d, "settings:gtk-theme-name", "Unable to retrieve");
+		icons = iniparser_getstring(d, "settings:gtk-icon-theme-name", "Unable to retrieve");
+		font = iniparser_getstring(d, "settings:gtk-font-name", "Unable to retrieve");
+	} else { /* if it can't be found, try gtk+-2.0 */
+		free(gtkrc);
+		len = strlen(home) + strlen("/.gtkrc-2.0") + 1; /* null-byte */
+		gtkrc = (char *)malloc(sizeof(char) * len);
+		snprintf(gtkrc, len, "%s/.gtkrc-2.0", home);
+		
+		/* now it doesn't matter if gtk+-2.0 is found or not,
+		 * as we set a default anyway */
+		d = iniparser_load(gtkrc);
+		theme = iniparser_getstring(d, ":gtk-theme-name", "Unable to retrieve");
+		icons = iniparser_getstring(d, ":gtk-icon-theme-name", "Unable to retrieve");
+		font = iniparser_getstring(d, ":gtk-font-name", "Unable to retrieve");
 	}
-	if(!gtktheme && !icontheme && !font)
-		gtktheme = icontheme = font = "Unable to retrieve";
-	fprintf(stdout, "    %sTheme:   %s%s\n    %sIcons:   %s%s\n    %sFont:    %s%s\n", LABEL, TEXT, gtktheme, LABEL, TEXT, icontheme, LABEL, TEXT, font);
-	free(gtktheme);
-	free(icontheme);
-	free(font);
+
+	free(gtkrc);
+	fprintf(stdout, "    %sTheme:   %s%s\n    %sIcons:   %s%s\n    %sFont:    %s%s\n", LABEL, TEXT, theme, LABEL, TEXT, icons, LABEL, TEXT, font);
+	iniparser_freedict(d);
 }
 
-void detectwm(char *username) {
+char *
+detectwm(char *username) {
+	Display *dpy;
+	Atom name, utf8, t;
+	int f;
+	unsigned long n, a;
 	FILE *pid;
-	int i;
-	char pgrep[100], *wm = NULL, *wmname, testwm[100];
+	unsigned int i, len;
+	char *pgrep, *wm, *wmname, testwm[100];
+	unsigned char *wm_xlib;
+	/* Window managers that do not set _NET_WM_NAME. If you know of any that do
+	 * not, that are not yet in here, please tell me.
+	 * Likewise, if there are some in here that do set it, please tell me. */
+	char *wmnames[] = { "dwm", "xmonad", "wmii", "sawfish", "monsterwm", \
+			"dminiwm", NULL };
 
-	for(i = 0; i < 34; i++) {
+	/* faster and cleaner */
+	if((dpy = XOpenDisplay(NULL))) {
+		name = XInternAtom(dpy, "_NET_WM_NAME", False);
+		utf8 = XInternAtom(dpy, "UTF8_STRING", False);
+
+		if(XGetWindowProperty(dpy, DefaultRootWindow(dpy), name, 0L, sizeof name,
+				False, utf8, &t, &f, &n, &a, &wm_xlib) == Success && wm_xlib) {
+			wm = (char *)wm_xlib;
+			XFree(wm_xlib);
+		}
+		XCloseDisplay(dpy);
+	}
+
+	/* Ugly, but workaround for window managers that do not set
+	 * _NET_WM_NAME. Only executed if the above fails */
+	for(i = 0; i < LENGTH(wmnames) && !wm; i++) {
 		wmname = wmnames[i];
-		snprintf(pgrep, 100, "pgrep -U %s -x %s", username, wmname);
+		len = strlen(username) + strlen(wmname) + strlen("pgrep -U %s -x %s");
+		pgrep = (char *)malloc(sizeof(char) * len);
+		snprintf(pgrep, len , "pgrep -U %s -x %s", username, wmname);
 		pid = popen(pgrep, "r");
 		if(pid != NULL) {
 			if(fgets(testwm, sizeof(testwm), pid)) {
@@ -101,48 +125,47 @@ void detectwm(char *username) {
 				pclose(pid);
 		}
 	}
+	free(pgrep);
 	if(!wm)
 		wm = "Unable to retrieve";
-	fprintf(stdout, "    %sWM:      %s%s\n", LABEL, TEXT, wm);
+	return wm;
 }
 
-void listpkgs(void) {
+int
+listpkgs(void) {
 	alpm_list_t *i;
 	alpm_db_t *db_path;
 	alpm_handle_t *handle = NULL;
 	int package = 0;
 
-	handle = alpm_initialize ("/", "/var/lib/pacman", NULL);
+	handle = alpm_initialize("/", "/var/lib/pacman", NULL);
 	db_path = alpm_get_localdb(handle);
-	for(i = alpm_db_get_pkgcache(db_path); i; i = alpm_list_next(i)) {
+	for(i = alpm_db_get_pkgcache(db_path); i; i = i->next)
 		package++;
-	}
+	alpm_list_free(i);
 	alpm_release(handle);
-	printf("    %sPacman:  %s%d installed packages\n", LABEL, TEXT, package);
+	return package;
 }
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[]) {
 	struct utsname my_uname;
-	char *username, *shell, *colorpath = NULL;
-	int opt;
+	char *username, *shell, *wm, *colorpath = NULL;
+	int opt, packages, showpkgs = 0, showcolors = 0;
 
 	while((opt = getopt(argc, argv, "hpc:o:")) != -1) {
 		switch(opt) {
 			case 'h':
-				printhelp(0);
-			break;
+				printhelp(EXIT_SUCCESS);
 			case 'c':
 				showcolors = 1;
-				colorpath = optarg;
-			break;
+				colorpath = optarg; /* probably unsafe */
+				break;
 			case 'p':
 				showpkgs = 1;
-			break;
-			case ':':
-				printhelp(1);
-			break;
+				break;
 			case '?':
-				printhelp(1);
+				printhelp(EXIT_FAILURE);
 		}
 	}
 
@@ -159,16 +182,22 @@ int main(int argc, char *argv[]) {
 		username = "Unable to retrieve";
 	if(!shell)
 		shell = "Unable to retrieve";
-	fprintf(stdout, "    %sShell:   %s%s\n    %sUser:    %s%s\n", LABEL, TEXT, shell, LABEL, TEXT, username);
-	if(uname(&my_uname) != -1)
-		fprintf(stdout, "    %sHost:    %s%s\n    %sKernel:  %s%s %s\n", LABEL, TEXT, my_uname.nodename, LABEL, TEXT, my_uname.release,my_uname.machine);
-	if(showpkgs)
-		listpkgs();
-	detectwm(username);
+	fprintf(stdout, "    %sShell:   %s%s\n    %sUser:    %s%s\n",
+			LABEL, TEXT, shell, LABEL, TEXT, username);
+	if(uname(&my_uname) >= 0) {
+		fprintf(stdout, "    %sHost:    %s%s\n    %sKernel:  %s%s %s\n",
+				LABEL, TEXT, my_uname.nodename, LABEL, TEXT, my_uname.release, my_uname.machine);
+	}
+	if(showpkgs) {
+		packages = listpkgs();
+		fprintf(stdout, "    %sPacman:  %s%d installed packages\n", LABEL, TEXT, packages);
+	}
+	wm = detectwm(username);
+	fprintf(stdout, "    %sWM:      %s%s\n", LABEL, TEXT, wm);
 	parsegtkrc();
 	if(showcolors) {
 		fprintf(stdout, "\n    %sTerminal colors:\n", LABEL);
-		system(colorpath);
+		system(colorpath); /* probably unsafe */
 	}
-	return 0;
+	exit(EXIT_SUCCESS);
 }

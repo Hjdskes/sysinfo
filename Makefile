@@ -1,18 +1,24 @@
-PROG     =  sysinfo
-PREFIX  ?= /usr/local
+PROG       = sysinfo
+CC         = gcc
+PREFIX    ?= /usr/local
+BINPREFIX  = ${PREFIX}/bin
 
-LIBS     =  -lalpm `pkg-config --cflags --libs glib-2.0`
-CFLAGS   =  -g -Os -Wall -Wextra
+LIBS       = -lX11 -lalpm -liniparser
+CFLAGS    += -Os -Wall
+
+debug: CFLAGS += -O0 -g -pedantic -Wextra
+debug: ${PROG}
 
 ${PROG}: ${PROG}.c
-	@${CC} ${CFLAGS} ${LIBS} -o ${PROG} ${PROG}.c
-	@strip ${PROG}
+	@${CC} ${CFLAGS} ${LIBS} ${PROG}.c -o ${PROG}
+
+install:
+	install -Dm755 ${PROG} ${DESTDIR}${BINPREFIX}/
+
+uninstall:
+	rm -f ${BINPREFIX}/${PROG}
 
 clean:
 	rm -f ${PROG}
 
-install:
-	install -Dm755 ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
-
-uninstall:
-	rm -f ${PREFIX}/bin/${PROG}
+.PHONY: debug clean install uninstall

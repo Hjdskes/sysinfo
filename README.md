@@ -5,7 +5,7 @@ Sysinfo
 
 This little application will print information about your system and your theme, along with some nice ASCII art when run.
 
-**NOTE:** This application is specifically written for Arch Linux; the ASCII art is the Arch Linux logo and the package count only works with Pacman. Sysinfo is made for lightweight desktops; it only checks `~/.config/gtk-3.0/settings.ini`, `~/.gtkrc-2.0` and `~/.gtkrc-2.0.mine` for its theme retrieval.
+**NOTE:** This application is currently written for Arch Linux; the ASCII art is the Arch Linux logo and the package count only works with Pacman. I will accept pull requests that enable supports for other distributions. Sysinfo is made for lightweight desktops; it only checks `~/.config/gtk-3.0/settings.ini` and `~/.gtkrc-2.0` for its theme retrieval. Sorry KDE users!
 
 Currently, it prints the following:
 * Shell;
@@ -13,7 +13,7 @@ Currently, it prints the following:
 * Hostname;
 * Kernel version and OS type (64 or 32 bit);
 * Amount of installed packages[1];
-* Window manager
+* Window manager;
 * GTK theme;
 * Icon set (GTK);
 * Font (GTK);
@@ -38,9 +38,10 @@ Currently, it prints the following:
 Supported Window Managers and Desktop Environments
 --------------------------------------------------
 
-The following Window Managers are supported.
+Window Managers are retrieved by first trying to read `_NET_WM_NAME` on the root window. If this fails, a fallback is run which uses pgrep.
 
-**Window Managers:**
+The following Window Managers are supported:
+
 * Fluxbox;
 * Openbox;
 * Blackbox;
@@ -79,16 +80,11 @@ The following Window Managers are supported.
 Installation
 ------------
 
-Two dependencies are to be installed, namely `pacman` and `glib2`.
+Two dependencies are to be installed, namely `pacman` and `iniparser`.
 To build and install, run:
 
 	$ make
 	# sudo make install
-
-ToDo
-----
-
-* Remove our dependency on glib2; requiring the whole glib2 library is overkill for our use. Perhaps switch to iniparser, or come up with something ourselves?
 
 Bugs
 ----
@@ -99,10 +95,6 @@ Should you find any, please open an [issue][bug].
 
 License
 -------
-**Sysinfo** is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This project is licensed under the GNU General Public License and should be treated as such. See `COPYING` for more information.
 
-**Sysinfo** is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-**Copyright © 2013** Jente (jthidskes at outlook dot com)
+**Copyright © 2013-2014** Jente (jthidskes at outlook dot com)
