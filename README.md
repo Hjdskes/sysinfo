@@ -35,7 +35,7 @@ Currently, it prints the following:
 	for i in {8..15}; do echo -en "\e[1;$((22+$i))m █ ${colors[i]} \e[0m"; done
 	echo -e "\n"
 
-Supported Window Managers and Desktop Environments
+Supported Window Managers
 --------------------------------------------------
 
 Window Managers are retrieved by first trying to read `_NET_WM_NAME` on the root window. If this fails, a fallback is run which uses pgrep.
