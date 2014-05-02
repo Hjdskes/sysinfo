@@ -97,4 +97,4 @@ License
 -------
 This project is licensed under the GNU General Public License and should be treated as such. See `COPYING` for more information.
 
-**Copyright © 2013-2014** Jente (jthidskes at outlook dot com)
+**Copyright © 2013-2014** Jente Hidskes (hjdskes@gmail.com)
