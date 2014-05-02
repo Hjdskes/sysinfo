@@ -91,7 +91,7 @@ Bugs
 
 Should you find any, please open an [issue][bug].
 
-[bug]: https://github.com/Unia/sysinfo
+[bug]: https://github.com/Unia/sysinfo/issues
 
 License
 -------
