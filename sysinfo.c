@@ -48,12 +48,12 @@ void
 parsegtkrc() {
 	dictionary *d;
 	char *home, *gtkrc, *theme, *icons, *font;
-	int len;
+	size_t len;
 
 	home = getenv("HOME");
 	/* first try gtk+-3.0 */
 	len = strlen(home) + strlen("/.config/gtk-3.0/settings.ini") + 1; /* null-byte */
-	gtkrc = (char *)malloc(sizeof(char) * len);
+	gtkrc = (char *)malloc(len);
 	snprintf(gtkrc, len, "%s/.config/gtk-3.0/settings.ini", home);
 	if(access(gtkrc, F_OK) == 0) {
 		d = iniparser_load(gtkrc);
@@ -63,7 +63,7 @@ parsegtkrc() {
 	} else { /* if it can't be found, try gtk+-2.0 */
 		free(gtkrc);
 		len = strlen(home) + strlen("/.gtkrc-2.0") + 1; /* null-byte */
-		gtkrc = (char *)malloc(sizeof(char) * len);
+		gtkrc = (char *)malloc(len);
 		snprintf(gtkrc, len, "%s/.gtkrc-2.0", home);
 		
 		/* now it doesn't matter if gtk+-2.0 is found or not,
@@ -80,20 +80,21 @@ parsegtkrc() {
 }
 
 char *
-detectwm(char *username) {
+detectwm(const char *username) {
 	Display *dpy;
 	Atom name, utf8, t;
 	int f;
 	unsigned long n, a;
 	FILE *pid;
-	unsigned int i, len;
+	unsigned int i;
+	size_t len;
 	char *pgrep, *wm, *wmname, testwm[100];
 	unsigned char *wm_xlib;
 	/* Window managers that do not set _NET_WM_NAME. If you know of any that do
 	 * not, that are not yet in here, please tell me.
 	 * Likewise, if there are some in here that do set it, please tell me. */
 	char *wmnames[] = { "dwm", "xmonad", "wmii", "sawfish", "monsterwm", \
-			"dminiwm", NULL };
+			"dminiwm", "mutter", NULL };
 
 	/* faster and cleaner */
 	if((dpy = XOpenDisplay(NULL))) {
@@ -106,14 +107,15 @@ detectwm(char *username) {
 			XFree(wm_xlib);
 		}
 		XCloseDisplay(dpy);
+		return wm;
 	}
 
 	/* Ugly, but workaround for window managers that do not set
 	 * _NET_WM_NAME. Only executed if the above fails */
-	for(i = 0; i < LENGTH(wmnames) && !wm; i++) {
+	for(i = 0; i < LENGTH(wmnames); i++) {
 		wmname = wmnames[i];
 		len = strlen(username) + strlen(wmname) + strlen("pgrep -U %s -x %s");
-		pgrep = (char *)malloc(sizeof(char) * len);
+		pgrep = (char *)malloc(len);
 		snprintf(pgrep, len , "pgrep -U %s -x %s", username, wmname);
 		pid = popen(pgrep, "r");
 		if(pid != NULL) {
@@ -124,8 +126,8 @@ detectwm(char *username) {
 			} else
 				pclose(pid);
 		}
+		free(pgrep);
 	}
-	free(pgrep);
 	if(!wm)
 		wm = "Unable to retrieve";
 	return wm;
@@ -150,7 +152,8 @@ listpkgs(void) {
 int
 main(int argc, char *argv[]) {
 	struct utsname my_uname;
-	char *username, *shell, *wm, *colorpath = NULL;
+	const char *username, *shell;
+	char *wm, *colorpath = NULL;
 	int opt, packages, showpkgs = 0, showcolors = 0;
 
 	while((opt = getopt(argc, argv, "hpc:o:")) != -1) {
