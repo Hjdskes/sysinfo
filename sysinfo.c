@@ -34,7 +34,19 @@
 #define BOLDTEXT  "\033[1;37m"
 #define LENGTH(X) (sizeof X / sizeof X[0]) 
 
-void
+static void*
+s_malloc(size_t size) {
+	void *pointer;
+
+	pointer = malloc(size);
+	if(pointer == NULL) {
+		fprintf(stderr, "sysinfo: can't allocate memory.\n");
+		exit(EXIT_FAILURE);
+	}
+	return pointer;
+}
+
+static void
 printhelp(int exval) {
 	fprintf(stdout, "sysinfo - %sshow system/theme information in screenshots\n\
 	sysinfo [-h] [-p] [-c /path/to/script]\n\n\
@@ -44,7 +56,7 @@ printhelp(int exval) {
  	exit(exval);
 }
 
-void
+static void
 parsegtkrc() {
 	dictionary *d;
 	char *home, *gtkrc, *theme, *icons, *font;
@@ -53,7 +65,7 @@ parsegtkrc() {
 	home = getenv("HOME");
 	/* first try gtk+-3.0 */
 	len = strlen(home) + strlen("/.config/gtk-3.0/settings.ini") + 1; /* null-byte */
-	gtkrc = (char *)malloc(len);
+	gtkrc = (char *)s_malloc(len);
 	snprintf(gtkrc, len, "%s/.config/gtk-3.0/settings.ini", home);
 	if(access(gtkrc, F_OK) == 0) {
 		d = iniparser_load(gtkrc);
@@ -63,7 +75,7 @@ parsegtkrc() {
 	} else { /* if it can't be found, try gtk+-2.0 */
 		free(gtkrc);
 		len = strlen(home) + strlen("/.gtkrc-2.0") + 1; /* null-byte */
-		gtkrc = (char *)malloc(len);
+		gtkrc = (char *)s_malloc(len);
 		snprintf(gtkrc, len, "%s/.gtkrc-2.0", home);
 		
 		/* now it doesn't matter if gtk+-2.0 is found or not,
@@ -79,7 +91,7 @@ parsegtkrc() {
 	iniparser_freedict(d);
 }
 
-char *
+static char *
 detectwm(const char *username) {
 	Display *dpy;
 	Atom name, utf8, t;
@@ -115,7 +127,7 @@ detectwm(const char *username) {
 	for(i = 0; i < LENGTH(wmnames); i++) {
 		wmname = wmnames[i];
 		len = strlen(username) + strlen(wmname) + strlen("pgrep -U %s -x %s");
-		pgrep = (char *)malloc(len);
+		pgrep = (char *)s_malloc(len);
 		snprintf(pgrep, len , "pgrep -U %s -x %s", username, wmname);
 		pid = popen(pgrep, "r");
 		if(pid != NULL) {
@@ -133,7 +145,7 @@ detectwm(const char *username) {
 	return wm;
 }
 
-int
+static int
 listpkgs(void) {
 	alpm_list_t *i;
 	alpm_db_t *db_path;
